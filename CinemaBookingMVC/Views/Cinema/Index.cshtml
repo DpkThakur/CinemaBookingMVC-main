@@ -1,0 +1,72 @@
+﻿@model IEnumerable<CinemaBookingMVC.Models.Booking>
+@{
+    ViewData["Title"] = "Booked Tickets";
+    var movies = ViewBag.Movies as List<Movie> ?? new List<Movie>();
+}
+
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h2>Booked Cinema Tickets</h2>
+    <div>
+        <a asp-action="BookTicket" class="btn btn-primary"><i class="bi bi-plus-circle"></i> Book New Ticket</a>
+        <a asp-action="About" class="btn btn-outline-secondary">About Cinema</a>
+    </div>
+</div>
+
+@if (TempData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["SuccessMessage"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<div class="table-responsive">
+    <table class="table table-hover table-striped align-middle border">
+        <thead class="table-dark">
+            <tr>
+                <th>Customer</th>
+                <th>Movie</th>
+                <th>Show Date</th>
+                <th>Tickets</th>
+                <th>Booking Status</th>
+                <th>Total Amount</th>
+                <th>Action</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            var movie = movies.FirstOrDefault(m => m.MovieId == item.MovieId);
+            string movieName = movie?.MovieName ?? "Unknown";
+            decimal price = movie?.TicketPrice ?? 0m;
+            string status = item.GetBookingStatus();
+            decimal totalAmount = item.CalculateTotalAmount(price);
+
+            string badgeClass = status switch
+            {
+                "Completed" => "bg-success",
+                "Today" => "bg-warning text-dark",
+                "Cancelled" => "bg-danger",
+                "Upcoming" => "bg-info text-dark",
+                _ => "bg-secondary"
+            };
+
+            <tr>
+                <td><strong>@item.CustomerName</strong></td>
+                <td>@movieName</td>
+                <td>@item.ShowDate.ToString("yyyy-MM-dd")</td>
+                <td>@item.NumberOfTickets</td>
+                <td>
+                    <span class="badge @badgeClass fs-6">@status</span>
+                </td>
+                <td><strong>@totalAmount.ToString("C")</strong></td>
+                <td>
+                    <a asp-action="MovieDetails" asp-route-id="@item.BookingId" class="btn btn-sm btn-info text-white">
+                        Movie Details
+                    </a>
+                </td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

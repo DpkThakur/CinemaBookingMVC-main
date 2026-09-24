@@ -1,0 +1,103 @@
+@model CinemaBookingMVC.Models.Booking
+@{
+    ViewData["Title"] = "Movie & Booking Details";
+    var movie = ViewBag.Movie as Movie;
+    string status = Model.GetBookingStatus();
+    decimal price = movie?.TicketPrice ?? 0m;
+    decimal totalAmount = Model.CalculateTotalAmount(price);
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+
+        @* Requirement 9: Conditional Bootstrap Alerts based on Booking Status *@
+        @if (status == "Completed")
+        {
+            <div class="alert alert-success d-flex align-items-center" role="alert">
+                <div>
+                    <strong>Completed:</strong> The show date has passed. Total Paid: <strong>@totalAmount.ToString("C")</strong>
+                </div>
+            </div>
+        }
+        else if (status == "Today")
+        {
+            <div class="alert alert-warning d-flex align-items-center" role="alert">
+                <div>
+                    <strong>Scheduled for Today!</strong> Get ready for your movie. Total Due: <strong>@totalAmount.ToString("C")</strong>
+                </div>
+            </div>
+        }
+        else if (status == "Cancelled")
+        {
+            <div class="alert alert-danger d-flex align-items-center" role="alert">
+                <div>
+                    <strong>Booking Cancelled:</strong> This reservation was cancelled on @Model.CancellationDate?.ToString("yyyy-MM-dd").
+                </div>
+            </div>
+        }
+        else if (status == "Upcoming")
+        {
+            <div class="alert alert-info d-flex align-items-center" role="alert">
+                <div>
+                    <strong>Upcoming Show:</strong> Scheduled for @Model.ShowDate.ToString("yyyy-MM-dd"). Total Amount: <strong>@totalAmount.ToString("C")</strong>
+                </div>
+            </div>
+        }
+
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <h4 class="mb-0">Booking & Movie Details (#@Model.BookingId)</h4>
+                <span class="badge bg-light text-dark fs-6">@status</span>
+            </div>
+            <div class="card-body">
+                <h5 class="text-primary border-bottom pb-2">Customer Information</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Customer Name</dt>
+                    <dd class="col-sm-8">@Model.CustomerName</dd>
+
+                    <dt class="col-sm-4">Email</dt>
+                    <dd class="col-sm-8">@Model.Email</dd>
+
+                    <dt class="col-sm-4">Phone</dt>
+                    <dd class="col-sm-8">@Model.Phone</dd>
+                </dl>
+
+                <h5 class="text-primary border-bottom pb-2 mt-4">Movie Details</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Movie Name</dt>
+                    <dd class="col-sm-8">@(movie?.MovieName ?? "N/A")</dd>
+
+                    <dt class="col-sm-4">Genre</dt>
+                    <dd class="col-sm-8">@(movie?.Genre ?? "N/A")</dd>
+
+                    <dt class="col-sm-4">Language</dt>
+                    <dd class="col-sm-8">@(movie?.Language ?? "N/A")</dd>
+
+                    <dt class="col-sm-4">Ticket Price</dt>
+                    <dd class="col-sm-8">@price.ToString("C")</dd>
+                </dl>
+
+                <h5 class="text-primary border-bottom pb-2 mt-4">Booking Summary</h5>
+                <dl class="row">
+                    <dt class="col-sm-4">Booking Date</dt>
+                    <dd class="col-sm-8">@Model.BookingDate.ToString("yyyy-MM-dd")</dd>
+
+                    <dt class="col-sm-4">Show Date</dt>
+                    <dd class="col-sm-8">@Model.ShowDate.ToString("yyyy-MM-dd")</dd>
+
+                    <dt class="col-sm-4">Number of Tickets</dt>
+                    <dd class="col-sm-8">@Model.NumberOfTickets</dd>
+
+                    <dt class="col-sm-4">Cancellation Date</dt>
+                    <dd class="col-sm-8">@(Model.CancellationDate.HasValue ? Model.CancellationDate.Value.ToString("yyyy-MM-dd") : "N/A")</dd>
+
+                    <dt class="col-sm-4 fs-5">Total Amount</dt>
+                    <dd class="col-sm-8 fs-5 text-success"><strong>@totalAmount.ToString("C")</strong></dd>
+                </dl>
+            </div>
+            <div class="card-footer text-end bg-light">
+                <a asp-action="Index" class="btn btn-secondary">Back to Bookings</a>
+            </div>
+        </div>
+    </div>
+</div>
